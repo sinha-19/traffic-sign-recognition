@@ -2,7 +2,7 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
-import tensorflow as tf
+import tf_keras
 
 SIGN_NAMES = ['Speed limit 20','Speed limit 30','Speed limit 50','Speed limit 60',
  'Speed limit 70','Speed limit 80','End speed limit 80','Speed limit 100',
@@ -20,7 +20,7 @@ IMG_SIZE = 32
 
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model('traffic_sign_cnn.keras')
+    return tf_keras.models.load_model('traffic_sign_cnn.keras')
 
 model = load_model()
 
@@ -33,10 +33,12 @@ uploaded = st.file_uploader("Choose an image", type=["jpg","jpeg","png"])
 if uploaded is not None:
     img = Image.open(uploaded).convert('RGB')
     st.image(img, caption='Uploaded image', use_container_width=True)
+
     arr = np.array(img.resize((IMG_SIZE, IMG_SIZE)), dtype='float32') / 255.0
     preds = model.predict(np.expand_dims(arr, 0))[0]
     cls = int(np.argmax(preds))
     conf = float(preds[cls])
+
     st.subheader("Prediction")
     st.success(f"{SIGN_NAMES[cls]} (ID {cls})")
     st.write(f"Confidence: {conf:.4f}")
